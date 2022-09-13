@@ -127,8 +127,8 @@ module Devise
       end
 
       module EncryptionInstanceMethods
-        def otp_secret_key
-          otp_decrypt(encrypted_otp_secret_key)
+        def otp_secret_key(options = {})
+          otp_decrypt(encrypted_otp_secret_key, options)
         end
 
         def otp_secret_key=(value)
@@ -137,12 +137,12 @@ module Devise
 
         private
 
-        def otp_decrypt(encrypted_value)
+        def otp_decrypt(encrypted_value, options = {})
           return encrypted_value if encrypted_value.blank?
 
           encrypted_value = encrypted_value.unpack('m').first
 
-          value = ::Encryptor.decrypt(encryption_options_for(encrypted_value))
+          value = ::Encryptor.decrypt(encryption_options_for(encrypted_value, options))
 
           if defined?(Encoding)
             encoding = Encoding.default_internal || Encoding.default_external
@@ -152,21 +152,21 @@ module Devise
           value
         end
 
-        def otp_encrypt(value)
+        def otp_encrypt(value, options = {})
           return value if value.blank?
 
           value = value.to_s
-          encrypted_value = ::Encryptor.encrypt(encryption_options_for(value))
+          encrypted_value = ::Encryptor.encrypt(encryption_options_for(value, options))
 
           encrypted_value = [encrypted_value].pack('m')
 
           encrypted_value
         end
 
-        def encryption_options_for(value)
+        def encryption_options_for(value, options = {})
           {
             value: value,
-            key: Devise.otp_secret_encryption_key,
+            key: options[:otp_secret_encryption_key] || Devise.otp_secret_encryption_key,
             iv: iv_for_attribute,
             salt: salt_for_attribute,
             algorithm: 'aes-256-cbc'

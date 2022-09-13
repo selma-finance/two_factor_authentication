@@ -77,13 +77,20 @@ describe Devise::Models::TwoFactorAuthenticatable do
         @totp_helper = TotpHelper.new(instance.otp_secret_key, instance.class.otp_length)
       end
 
-      def do_invoke(code, user)
-        user.authenticate_totp(code)
+      def do_invoke(code, user, options = {})
+        user.authenticate_totp(code, options)
       end
 
       it 'authenticates a recently created code' do
         code = @totp_helper.totp_code
         expect(do_invoke(code, instance)).to eq(true)
+      end
+
+      context 'when secret key passed in options' do
+        it 'authenticates a recently created code' do
+          code = @totp_helper.totp_code
+          expect(do_invoke(code, instance, {otp_secret_encryption_key: instance.otp_secret_encryption_key})).to eq(true)
+        end
       end
 
       it 'authenticates a code entered with a space' do
