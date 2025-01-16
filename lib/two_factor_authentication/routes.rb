@@ -11,9 +11,7 @@ module ActionDispatch::Routing
                path: path,
                controller: controller
 
-      post "#{path}/resend_code",
-           to: "#{controller}#resend_code",
-           as: "#{mapping.name}_two_factor_authentication_resend_code"
+      post "#{path}/resend_code", to: "#{controller}#resend_code"
     end
   end
 end
